@@ -58,9 +58,17 @@ class ViewController: UIViewController {
     }
     
     private func start() {
-        let startTime = Date()
-        let result = bruteForce(startString: "0000", endString: "ZZZZ")
-        stop(password: result ?? "Error", startTime: startTime)
+        /// создаем очередь
+        let queue = DispatchQueue.global(qos: .userInitiated)
+        queue.async {
+            let startTime = Date()
+            let result = self.bruteForce(startString: "0000", endString: "ZZZZ")
+            /// обновляем UI в главном потоке
+            DispatchQueue.main.async {
+                self.stop(password: result ?? "Error", startTime: startTime)
+            }
+            
+        }
     }
     
     // Возвращает подобранный пароль
@@ -118,6 +126,8 @@ class ViewController: UIViewController {
     private func stop(password: String, startTime: Date) {
         
         indicator.stopAnimating()
+        ///  выключаем индикатор
+        indicator.isHidden = true
         enableStartButton()
         generatePasswordButton.isEnabled = true
         generatePasswordButton.alpha = 1
